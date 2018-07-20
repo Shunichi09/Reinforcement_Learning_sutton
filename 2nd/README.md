@@ -70,6 +70,7 @@ https://github.com/ShangtongZhang
 
 図のイメージ
 この場合はスロットが5本の腕を持つとしています
+
 ![image.png](https://qiita-image-store.s3.amazonaws.com/0/261584/19a93283-8332-2718-f9bf-c985651ac8ac.png)
 
 
