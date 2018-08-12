@@ -16,7 +16,7 @@ def card_range_correcter(card): # 引いたカードはここ通す
 class Dealer(): # ディーラーの場合
     def __init__(self):
         # 見えているカード
-        self.open = card_range_correcter(np.random.randint(1, 14))
+        self.open = card_range_correcter(np.random.randint(1, 11))
         # ディラーが持っているカード（1枚が見えているカード）
         self.cards = [self.open, card_range_correcter(np.random.randint(1, 14))]
         self.score = None
@@ -54,12 +54,20 @@ class Dealer(): # ディーラーの場合
 
 class Player(): # playerの場合
     def __init__(self):
-        self.cards = [card_range_correcter(np.random.randint(1, 14)), card_range_correcter(np.random.randint(1, 14))] # 持っているカード これは最初2枚もってるから　下2つは個数合うはず
+        
         # 持っているカードの和の推移（状態の推移）
-        self.state_traj = []
+        self.state_traj = [np.random.randint(12, 22)]
         # Aceのtraj
-        self.traj_Ace_flag = []
-    
+        self.traj_Ace_flag = [bool(np.random.randint(0, 2))]
+
+        if self.traj_Ace_flag[0]:
+            self.cards = [self.state_traj[0]-11, 11]
+        else:
+            temp = np.random.randint(2,10)
+            self.cards = [self.state_traj[0]-temp, temp]
+
+        self.init_flag = True
+
     def play(self):
         stop_flag, score = self._judge_stop()
 
@@ -76,29 +84,40 @@ class Player(): # playerの場合
         # 和をとる
         score = sum(self.cards)
 
-        # 大きさ確認
-        while 11 in self.cards and score > 21: # 21より大きくてAceを利用する場合
-            self.cards[self.cards.index(11)] = 1 # 1を代入
-            score = sum(self.cards)
+        if self.init_flag:
+            # print('state_traj = {0}'.format(self.state_traj))
+            # print('cards = {0}'.format(self.cards))
+            
+            # 20以上だとplayerはストップ  ここが方策になる
+            if score >= 20:
+                stop_flag = True
 
-        # 履歴に状態追加
-        self.state_traj.append(score)
+            self.init_flag = False
 
-        # print('state_traj = {0}'.format(self.state_traj))
-        # print('cards = {0}'.format(self.cards))
-        
-        # 20以上だとplayerはストップ  ここが方策になる
-        if score >= 20:
-            stop_flag = True
-        
-        # ここでAceを利用しているか判定
-        if 11 in self.cards:
-            Ace_flag = True
         else:
-            Ace_flag = False
-        
-        # 履歴に追加しておく
-        self.traj_Ace_flag.append(Ace_flag)
+            # 大きさ確認
+            while 11 in self.cards and score > 21: # 21より大きくてAceを利用する場合
+                self.cards[self.cards.index(11)] = 1 # 1を代入
+                score = sum(self.cards)
+
+            # 履歴に状態追加
+            self.state_traj.append(score)
+
+            # print('state_traj = {0}'.format(self.state_traj))
+            # print('cards = {0}'.format(self.cards))
+            
+            # 20以上だとplayerはストップ  ここが方策になる
+            if score >= 20:
+                stop_flag = True
+            
+            # ここでAceを利用しているか判定
+            if 11 in self.cards:
+                Ace_flag = True
+            else:
+                Ace_flag = False
+            
+            # 履歴に追加しておく
+            self.traj_Ace_flag.append(Ace_flag)
 
         return stop_flag, score
 
@@ -136,29 +155,29 @@ class Blackjack():
         print('reward = {0}'.format(reward))
         print('traj_Ace_flag = {0}'.format(traj_Ace_flag))
         '''
+
         # 初期訪問MCの場合　同じ状態の蓄積はいらない
 
+        state_traj_unique = state_traj
+        traj_Ace_flag_unique = traj_Ace_flag
 
-        '''
-        state_traj_unique = []
-        traj_Ace_flag_unique = []
-
+        ''' 今回は同じ状態にならないのでいりません
         for i in range(len(state_traj)):
             if state_traj[i] not in state_traj_unique:
                 state_traj_unique.append(state_traj[i])
                 traj_Ace_flag_unique.append(traj_Ace_flag[i])
-
-
-        print('state_traj = {0}'.format(state_traj))
-        print('traj_Ace_flag = {0}'.format(traj_Ace_flag))
         '''
 
+
+        # print('state_traj_unique = {0}'.format(state_traj_unique))
+        # print('traj_Ace_flag_unique = {0}'.format(traj_Ace_flag_unique))
+
         # 保存
-        for i in range(len(state_traj)):
-            if state_traj[i] > 21 or state_traj[i] < 12: # 21以上と12以下はいれてもしょうがないのでパス
+        for i in range(len(state_traj_unique)):
+            if state_traj_unique[i] > 21 or state_traj_unique[i] < 12: # 21以上と12以下はいれてもしょうがないのでパス
                 continue
         
-            colums = state_traj[i] - 12
+            colums = state_traj_unique[i] - 12
             # print(state_traj[i])
 
             if open_card == 11: # 11換算でも見えているのはAce
@@ -166,15 +185,13 @@ class Blackjack():
 
             rows = open_card - 1
 
-            if traj_Ace_flag[i]:
+            if traj_Ace_flag_unique[i]:
                 self.value_state_Ace[rows][colums].append(reward)
             else:
                 self.value_state_No_Ace[rows][colums].append(reward)
-        '''
-        print('self.value_state_Ace = {0}'.format(self.value_state_Ace))
-        print('self.value_state_No_Ace = {0}'.format(self.value_state_No_Ace))
-        '''
-        # sys.exit()
+        
+        # print('self.value_state_Ace = {0}'.format(self.value_state_Ace))
+        # print('self.value_state_No_Ace = {0}'.format(self.value_state_No_Ace))
 
         return self.value_state_Ace, self.value_state_No_Ace
         
