@@ -19,7 +19,6 @@ class Dealer(): # ディーラーの場合
         self.open = card_range_correcter(np.random.randint(1, 11))
         # ディラーが持っているカード（1枚が見えているカード）
         self.cards = [self.open, card_range_correcter(np.random.randint(1, 14))]
-        self.score = None
 
     def play(self): # ゲームする場合/交互に引くわけではないので，まずはディーラー
         stop_flag, score = self._judge_stop()
@@ -58,7 +57,7 @@ class Player(): # playerの場合
         # 持っているカードの和の推移（状態の推移）
         self.state_traj = [np.random.randint(12, 22)]
         # Aceのtraj
-        self.traj_Ace_flag = [bool(np.random.randint(0, 2))]
+        self.traj_Ace_flag = [bool(np.random.choice([0, 1]))]
 
         if self.traj_Ace_flag[0]:
             self.cards = [self.state_traj[0]-11, 11]
@@ -129,20 +128,23 @@ class Blackjack():
     def __init__(self):
         # モンテカルロのやつ保存する
         # self.value_state = np.zeros((2, 10, 10))で三次元的にやるのもありですが．．．わかりにくそうなのでやめます
-        # 行がディラーのopenカード（1-10），列がプレイヤーの和（12-21）
-        self.value_state_Ace = [[[] for i in range(10)] for k in range(10)]
-        self.value_state_No_Ace = [[[] for i in range(10)] for k in range(10)] # AceとAceなしでそれぞれ状態は10×10あります      
+        # 行がプレイヤーの和（12-21），列がディラーのopenカード（1-10）
+        self.value_state_Ace = np.array([[0.0 for i in range(10)] for k in range(10)])
+        self.value_state_No_Ace = np.array([[0.0 for i in range(10)] for k in range(10)]) # AceとAceなしでそれぞれ状態は10×10あります
+        # カウンター
+        self.count_value_state_Ace = np.array([[0 for i in range(10)] for k in range(10)])
+        self.count_value_state_No_Ace = np.array([[0 for i in range(10)] for k in range(10)]) # AceとAceなしでそれぞれ状態は10×10あります  
     
     def play(self):
         # 各プレイヤー定義
         self.dealer = Dealer()
         self.player = Player() 
 
-        # まずはディーラー
-        open_card, dealer_score = self.dealer.play()
-
         # 次にプレイヤー
         state_traj, traj_Ace_flag, player_score = self.player.play()
+
+        # まずはディーラー
+        open_card, dealer_score = self.dealer.play()
 
         # judge
         reward = self._reward(dealer_score, player_score)
@@ -174,33 +176,36 @@ class Blackjack():
 
         # 保存
         for i in range(len(state_traj_unique)):
-            if state_traj_unique[i] > 21 or state_traj_unique[i] < 12: # 21以上と12以下はいれてもしょうがないのでパス
+            if state_traj_unique[i] > 21 or state_traj_unique[i] < 12: # 22以上と11以下はいれてもしょうがないのでパス
                 continue
         
-            colums = state_traj_unique[i] - 12
+            rows = state_traj_unique[i] - 12
             # print(state_traj[i])
 
             if open_card == 11: # 11換算でも見えているのはAce
                 open_card = 1
 
-            rows = open_card - 1
+            colums = open_card - 1
 
             if traj_Ace_flag_unique[i]:
-                self.value_state_Ace[rows][colums].append(reward)
+                self.value_state_Ace[rows, colums] += reward
+                self.count_value_state_Ace[rows, colums] += 1
+
             else:
-                self.value_state_No_Ace[rows][colums].append(reward)
+                self.value_state_No_Ace[rows, colums] += reward
+                self.count_value_state_No_Ace[rows, colums] += 1
         
         # print('self.value_state_Ace = {0}'.format(self.value_state_Ace))
         # print('self.value_state_No_Ace = {0}'.format(self.value_state_No_Ace))
 
-        return self.value_state_Ace, self.value_state_No_Ace
+        return self.value_state_Ace, self.count_value_state_Ace, self.value_state_No_Ace, self.count_value_state_No_Ace
         
     def _reward(self, dealer_score, player_score): #価値計算
-        if dealer_score > 21: # dealerがくず手の時点で勝ち
-            reward = 1.0
+        if player_score > 21: # dealerがくず手の時点で勝ち
+            reward = -1.0
         else:
-            if player_score > 21: # 自分がくず手なら負け 
-                reward = -1.0
+            if dealer_score > 21: # 自分がくず手なら負け 
+                reward = 1.0
             else:
                 if player_score > dealer_score: # player勝ち
                     reward = 1.0
@@ -222,8 +227,8 @@ class Ploter_3D():
         self.axis = self.fig.add_subplot(111, projection='3d')
 
     def plot_3d(self):
-        self.axis.set_xlabel('player sum')
-        self.axis.set_ylabel('dealer open card')
+        self.axis.set_xlabel('dealer open card')
+        self.axis.set_ylabel('player sum')
         self.axis.set_zlabel('reward')
 
         X, Y = np.meshgrid(self.x, self.y)
@@ -239,26 +244,36 @@ def main():
     iterations = 500000
 
     for i in range(iterations):
-        print('i = {0}'.format(i))
-        value_state_Ace, value_state_No_Ace = game.play()
+        # print('i = {0}'.format(i))
+        value_state_Ace, count_value_state_Ace, value_state_No_Ace, count_value_state_No_Ace = game.play()
 
+    ave_value_state_Ace = value_state_Ace / count_value_state_Ace
+    ave_value_state_No_Ace = value_state_No_Ace / count_value_state_No_Ace
+
+    '''
     ave_value_state_Ace = [[0.0 for i in range(10)] for k in range(10)]
     ave_value_state_No_Ace = [[0.0 for i in range(10)] for k in range(10)]
 
 
     for row in range(len(value_state_Ace)):
         for colum in range(len(value_state_Ace[0])):
-            ave_value_state_Ace[row][colum] = np.average(value_state_Ace[row][colum])
-            ave_value_state_No_Ace[row][colum] = np.average(value_state_No_Ace[row][colum])
+            print(value_state_Ace[row][colum])
+            ave_value_state_Ace[row][colum] = round(sum(value_state_Ace[row][colum])/len(value_state_Ace[row][colum]), 3)
+            ave_value_state_No_Ace[row][colum] = round(sum(value_state_No_Ace[row][colum])/len(value_state_No_Ace[row][colum]), 3)
 
-    # print(ave_value_state_Ace)
+    print(np.transpose(ave_value_state_No_Ace))
+    '''
+
+    print(np.round(ave_value_state_Ace, 3))
+    print(np.round(ave_value_state_No_Ace, 3))
 
     # 空配列が存在する場合⇒今回はないと想定
 
     # 3Dplot
     # 軸の作成
-    x = np.array(range(12, 22)) # openされているカード
-    y = np.array(range(1, 11)) # sumの状態
+    
+    x = np.array(range(1, 11)) # sumの状態
+    y = np.array(range(12, 22)) # openされているカード
 
     # 格子に乗る値
     ploter_ace = Ploter_3D(x, y, np.array(ave_value_state_Ace))
