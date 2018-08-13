@@ -55,15 +55,15 @@ class Player(): # playerの場合
     def __init__(self):
         
         # 持っているカードの和の推移（状態の推移）
-        self.state_traj = [np.random.randint(12, 22)]
+        self.player_sum_traj = [np.random.randint(12, 22)]
         # Aceのtraj
-        self.traj_Ace_flag = [bool(np.random.choice([0, 1]))]
+        self.Ace_flag_traj = [bool(np.random.choice([0, 1]))]
 
-        if self.traj_Ace_flag[0]:
-            self.cards = [self.state_traj[0]-11, 11]
+        if self.Ace_flag_traj[0]:
+            self.cards = [self.player_sum_traj[0]-11, 11]
         else:
             temp = np.random.randint(2,10)
-            self.cards = [self.state_traj[0]-temp, temp]
+            self.cards = [self.player_sum_traj[0]-temp, temp]
 
         self.init_flag = True
 
@@ -74,7 +74,7 @@ class Player(): # playerの場合
             self._draw()
             stop_flag, score = self._judge_stop()          
 
-        return self.state_traj, self.traj_Ace_flag, score # 状態推移，Aceの推移，最終的なscore
+        return self.player_sum_traj, self.Ace_flag_traj, score # 状態推移，Aceの推移，最終的なscore
 
     def _judge_stop(self): # ゲーム終了かどうか判断(player)
         # 初期化
@@ -84,7 +84,7 @@ class Player(): # playerの場合
         score = sum(self.cards)
 
         if self.init_flag:
-            # print('state_traj = {0}'.format(self.state_traj))
+            # print('player_sum_traj = {0}'.format(self.player_sum_traj))
             # print('cards = {0}'.format(self.cards))
             
             # 20以上だとplayerはストップ  ここが方策になる
@@ -100,9 +100,9 @@ class Player(): # playerの場合
                 score = sum(self.cards)
 
             # 履歴に状態追加
-            self.state_traj.append(score)
+            self.player_sum_traj.append(score)
 
-            # print('state_traj = {0}'.format(self.state_traj))
+            # print('player_sum_traj = {0}'.format(self.player_sum_traj))
             # print('cards = {0}'.format(self.cards))
             
             # 20以上だとplayerはストップ  ここが方策になる
@@ -116,7 +116,7 @@ class Player(): # playerの場合
                 Ace_flag = False
             
             # 履歴に追加しておく
-            self.traj_Ace_flag.append(Ace_flag)
+            self.Ace_flag_traj.append(Ace_flag)
 
         return stop_flag, score
 
@@ -141,7 +141,7 @@ class Blackjack():
         self.player = Player() 
 
         # 次にプレイヤー
-        state_traj, traj_Ace_flag, player_score = self.player.play()
+        player_sum_traj, Ace_flag_traj, player_score = self.player.play()
 
         # まずはディーラー
         open_card, dealer_score = self.dealer.play()
@@ -150,44 +150,44 @@ class Blackjack():
         reward = self._reward(dealer_score, player_score)
 
         '''
-        print('state_traj = {0}'.format(state_traj))
+        print('player_sum_traj = {0}'.format(player_sum_traj))
         print('opencards = {0}'.format(open_card))
         print('delear_score = {0}'.format(dealer_score))
         print('player_score = {0}'.format(player_score))
         print('reward = {0}'.format(reward))
-        print('traj_Ace_flag = {0}'.format(traj_Ace_flag))
+        print('Ace_flag_traj = {0}'.format(Ace_flag_traj))
         '''
 
         # 初期訪問MCの場合　同じ状態の蓄積はいらない
 
-        state_traj_unique = state_traj
-        traj_Ace_flag_unique = traj_Ace_flag
+        player_sum_traj_unique = player_sum_traj
+        Ace_flag_traj_unique = Ace_flag_traj
 
         ''' 今回は同じ状態にならないのでいりません
-        for i in range(len(state_traj)):
-            if state_traj[i] not in state_traj_unique:
-                state_traj_unique.append(state_traj[i])
-                traj_Ace_flag_unique.append(traj_Ace_flag[i])
+        for i in range(len(player_sum_traj)):
+            if player_sum_traj[i] not in player_sum_traj_unique:
+                player_sum_traj_unique.append(player_sum_traj[i])
+                Ace_flag_traj_unique.append(Ace_flag_traj[i])
         '''
 
 
-        # print('state_traj_unique = {0}'.format(state_traj_unique))
-        # print('traj_Ace_flag_unique = {0}'.format(traj_Ace_flag_unique))
+        # print('player_sum_traj_unique = {0}'.format(player_sum_traj_unique))
+        # print('Ace_flag_traj_unique = {0}'.format(Ace_flag_traj_unique))
+        # 値補正
+        if open_card == 11: # 11換算でも見えているのはAce
+            open_card = 1
+
+        colums = open_card - 1
 
         # 保存
-        for i in range(len(state_traj_unique)):
-            if state_traj_unique[i] > 21 or state_traj_unique[i] < 12: # 22以上と11以下はいれてもしょうがないのでパス
+        for i in range(len(player_sum_traj_unique)):
+            if player_sum_traj_unique[i] > 21 or player_sum_traj_unique[i] < 12: # 22以上と11以下はいれてもしょうがないのでパス
                 continue
         
-            rows = state_traj_unique[i] - 12
-            # print(state_traj[i])
+            rows = player_sum_traj_unique[i] - 12
+            # print(player_sum_traj[i])
 
-            if open_card == 11: # 11換算でも見えているのはAce
-                open_card = 1
-
-            colums = open_card - 1
-
-            if traj_Ace_flag_unique[i]:
+            if Ace_flag_traj_unique[i]:
                 self.value_state_Ace[rows, colums] += reward
                 self.count_value_state_Ace[rows, colums] += 1
 
@@ -244,25 +244,11 @@ def main():
     iterations = 500000
 
     for i in range(iterations):
-        # print('i = {0}'.format(i))
+        print('i = {0}'.format(i))
         value_state_Ace, count_value_state_Ace, value_state_No_Ace, count_value_state_No_Ace = game.play()
 
     ave_value_state_Ace = value_state_Ace / count_value_state_Ace
     ave_value_state_No_Ace = value_state_No_Ace / count_value_state_No_Ace
-
-    '''
-    ave_value_state_Ace = [[0.0 for i in range(10)] for k in range(10)]
-    ave_value_state_No_Ace = [[0.0 for i in range(10)] for k in range(10)]
-
-
-    for row in range(len(value_state_Ace)):
-        for colum in range(len(value_state_Ace[0])):
-            print(value_state_Ace[row][colum])
-            ave_value_state_Ace[row][colum] = round(sum(value_state_Ace[row][colum])/len(value_state_Ace[row][colum]), 3)
-            ave_value_state_No_Ace[row][colum] = round(sum(value_state_No_Ace[row][colum])/len(value_state_No_Ace[row][colum]), 3)
-
-    print(np.transpose(ave_value_state_No_Ace))
-    '''
 
     print(np.round(ave_value_state_Ace, 3))
     print(np.round(ave_value_state_No_Ace, 3))
