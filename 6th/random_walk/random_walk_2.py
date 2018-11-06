@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 import random
 from collections import OrderedDict
 
@@ -96,7 +97,8 @@ class Agent():
             if state == "right_goal":
                 self.values[state] = 0.
         
-        self. = []
+        self.total_loss = 0.0
+        self.history_loss_state = []
 
     def train_TD(self, train_num):
         """training the agent TD methods
@@ -105,7 +107,7 @@ class Agent():
         train_num : int
             training number of reinforcement learning
         """
-        for _ in range(train_num):
+        for count in range(train_num+1):
             self.state = "C" # initial state has been decided
 
             while True: # Ending this while is worth of ending one episode
@@ -115,10 +117,10 @@ class Agent():
                 self._valuefunc_update_TD(temp_reward, self.state, next_state)
 
                 # save the state and update
-                self.history_state.append(self.state)
                 self.state = next_state
 
                 if end_flg:
+                    self._calc_RMS(count)
                     break
 
     def train_montecarlo(self, train_num):
@@ -128,7 +130,7 @@ class Agent():
         train_num : int
             training number of reinforcement learning
         """
-        for _ in range(train_num):
+        for count in range(train_num+1):
             self.state = "C" # initial state has been decided
             self.history_state = []
 
@@ -137,13 +139,17 @@ class Agent():
 
                 # save the state and update
                 # first visit method
+                """
                 if not self.state in self.history_state:
                     self.history_state.append(self.state)
+                """
+                self.history_state.append(self.state)
                 
                 self.state = next_state
 
                 if end_flg:
                     self._valuefunc_update_montecarlo(reward, self.history_state)
+                    self._calc_RMS(count)
                     break
 
     def _play(self, state):
@@ -201,19 +207,37 @@ class Agent():
         for state in history_state:
             self.values[state] = self.values[state] + self.step_rate * (final_reward - self.values[state])
 
-    def _calc_RMS(self):
+        # print(self.values)
+
+    def _calc_RMS(self, count):
         """calculating RMS
-
+        Parameters
+        -----------
+        count : int
+            training count
         """
-
-
-
+        ans_rate = [1/6, 2/6, 3/6, 4/6, 5/6]
+        for i, state in enumerate(self.states[1:-1]): # except for "left goal" and "right goal"
+            loss = math.sqrt((self.values[state] - ans_rate[i])**2)
+            self.total_loss += loss
+        
+        self.history_loss_state.append(self.total_loss/float(count + 1)/5.) # 5 means state num
 
 def main():
     # for fig 6.6 
     monte_alphas = [0.01, 0.02, 0.03, 0.04]
     td_alphas = [0.15, 0.1, 0.05]
 
+    for monte_alpha in monte_alphas:
+        agent = Agent(monte_alpha)
+        agent.train_montecarlo(100)
+        
+        plt.plot(range(len(agent.history_loss_state)), agent.history_loss_state, label="monte_{0}".format(monte_alpha), linestyle="dashed")
+
+    for td_alpha in td_alphas:
+        agent = Agent(td_alpha)
+        agent.train_TD(100)
+        plt.plot(range(len(agent.history_loss_state)), agent.history_loss_state, label="TD_{0}".format(td_alpha), linestyle="solid")
 
     plt.legend()
     plt.show()
