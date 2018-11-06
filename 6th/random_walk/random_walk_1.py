@@ -55,7 +55,7 @@ class RandomWalk():
 
 class Agent():
     """
-    environment model "Random model"
+    Agent model of reinforcement learning
     Attributes
     ------------
     state : str 
@@ -66,6 +66,12 @@ class Agent():
         agent possibile action list 
     step rate : float
         learning rate of reinforcement learning
+    discount rate : float
+        discount rate of reward
+    history_state : list 
+        one episode state (this should not have the same state, first visit ES methods)
+    values : OrderedDict
+        value function
     """
 
     def __init__(self):
@@ -90,8 +96,8 @@ class Agent():
             if state == "right_goal":
                 self.values[state] = 0.
 
-    def train(self, train_num):
-        """training the agent
+    def train_TD(self, train_num):
+        """training the agent TD methods
         Parameters
         -----------
         train_num : int
@@ -99,7 +105,6 @@ class Agent():
         """
         for _ in range(train_num):
             self.state = "C" # initial state has been decided
-            self.history_state = []
 
             while True: # Ending this while is worth of ending one episode
 
@@ -107,15 +112,11 @@ class Agent():
                 # for TD
                 self._valuefunc_update(temp_reward, self.state, next_state)
 
-                # save the state and update
-                self.history_state.append(self.state)
+                # update
                 self.state = next_state
 
                 if end_flg:
                     break
-                
-            # for montecarlo
-            # self._valuefunc_update()
 
     def _play(self, state):
         """
@@ -128,10 +129,6 @@ class Agent():
         """
         action = self._decide_action()
         end_flg, next_state, temp_reward = self.model.state_update(state, action)
-
-        # save the state for montecarlo
-        # if state not in self.history_state: # ES
-        #    self.history_state.append(self.state)
 
         return end_flg, next_state, temp_reward
 
@@ -162,24 +159,25 @@ class Agent():
         self.values[state] = self.values[state] + self.step_rate * (reward + self.discount_rate * self.values[next_state] - self.values[state])
 
 def main():
+    # for fig 6.6 
     # 0
     agent = Agent()
-    agent.train(0)
+    agent.train_TD(0)
     values = list(agent.values.values())
     plt.plot(range(len(agent.values.keys()) - 2), values[1:-1] , label="0", marker=".")
     # 1
     agent = Agent()
-    agent.train(1)
+    agent.train_TD(1)
     values = list(agent.values.values())
     plt.plot(range(len(agent.values.keys()) - 2), values[1:-1] , label="1", marker=".")
     # 10
     agent = Agent()
-    agent.train(10)
+    agent.train_TD(10)
     values = list(agent.values.values())
     plt.plot(range(len(agent.values.keys()) - 2), values[1:-1] , label="10", marker=".")
     # 100
     agent = Agent()
-    agent.train(100)
+    agent.train_TD(100)
     values = list(agent.values.values())
     plt.plot(range(len(agent.values.keys()) - 2), values[1:-1] , label="100", marker=".")
     # true
