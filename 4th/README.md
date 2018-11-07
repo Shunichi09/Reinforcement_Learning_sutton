@@ -37,7 +37,7 @@
 結論からいうとこの状態価値関数は以下の式で求められることになります．
 今回はもはやこの式がめちゃくちゃ重要なのでそれ以外は気にしなくてもいいぐらいです
 
-<img src=https://latex.codecogs.com/gif.latex?\begin{align}V_{k&plus;1}(s)&space;&&space;=&space;E_\pi&space;\bigr[&space;r_{t&plus;1}&plus;&space;\gamma&space;V_k&space;(s_t&space;&plus;1)&space;|&space;s_t&space;&plus;&space;s]&space;\\&&space;=&space;\sum_a&space;\pi(s,&space;a)&space;\sum_{s'}&space;\rho_{ss'}^a&space;[R_{ss'}^a&space;&plus;&space;\gamma&space;V_k(s')&space;]\end{align}>
+<img src="https://latex.codecogs.com/gif.latex?\begin{align}V_{k&plus;1}(s)&space;&&space;=&space;E_\pi&space;\bigr[&space;r_{t&plus;1}&plus;&space;\gamma&space;V_k&space;(s_t&space;&plus;1)&space;|&space;s_t&space;&plus;&space;s]&space;\\&&space;=&space;\sum_a&space;\pi(s,&space;a)&space;\sum_{s'}&space;\rho_{ss'}^a&space;[R_{ss'}^a&space;&plus;&space;\gamma&space;V_k(s')&space;]\end{align}" />
 
 いやいやどういうこと？ってなります
 まず，完全にモデルが分かってるとすると，一番最初の式は状態$S$に関する式なのだから，状態の数だけ式ができて，それを解けばよいってことになりますね．
@@ -86,7 +86,7 @@ kというのは計算回数です
 
 更新式は，次の通りです
 
-<img src=https://latex.codecogs.com/gif.latex?\begin{align}V_{k&plus;1}(s)&space;=&space;\sum_a&space;\pi(s,&space;a)&space;\sum_{s'}&space;\rho_{ss'}^a&space;[R_{ss'}^a&space;&plus;&space;\gamma&space;V_k(s')&space;]\end{align}>
+<img src="https://latex.codecogs.com/gif.latex?\begin{align}V_{k&plus;1}(s)&space;=&space;\sum_a&space;\pi(s,&space;a)&space;\sum_{s'}&space;\rho_{ss'}^a&space;[R_{ss'}^a&space;&plus;&space;\gamma&space;V_k(s')&space;]\end{align}" />
 
 # 迷路の問題
 問題はこんな感じ（[教科書](http://www.morikita.co.jp/books/book/1990)より引用）
@@ -164,7 +164,7 @@ value function is (iteration_num = 1999)  =
 
 行動価値関数は以下の式で表されます
 
-<img src=https://latex.codecogs.com/gif.latex?\begin{align}&space;Q^\pi(s)&space;&=&space;E_\pi&space;\bigl[R_t&space;|&space;s_t&space;=&space;s,&space;a_t&space;=&space;a]&space;&=&space;E_\pi&space;\bigl[\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}|s_t&space;=&space;s,&space;a_t&space;=&space;a]&space;&=&space;\sum_{s'}&space;\rho_{ss'}^a&space;\bigl[R_{ss'}^a&space;&plus;&space;\gamma&space;V^\pi&space;(s')&space;]&space;\end{align}>
+<img src= "https://latex.codecogs.com/gif.latex?\begin{align}&space;Q^\pi(s)&space;&=&space;E_\pi&space;\bigl[R_t&space;|&space;s_t&space;=&space;s,&space;a_t&space;=&space;a]&space;&=&space;E_\pi&space;\bigl[\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}|s_t&space;=&space;s,&space;a_t&space;=&space;a]&space;&=&space;\sum_{s'}&space;\rho_{ss'}^a&space;\bigl[R_{ss'}^a&space;&plus;&space;\gamma&space;V^\pi&space;(s')&space;]&space;\end{align}" />
 
 例えば，今ある状態sにおいて行動aをとり，その後方策πに従った場合の状態価値が，状態sからずっと方策πにしたがった場合よりも大きければ．．．
 行動を変えた方がいいことになります
@@ -217,7 +217,7 @@ value function is (iteration_num = 1999)  =
 
 という作戦です．これを式で表すと
 
-<img src=https://latex.codecogs.com/gif.latex?V_{k&plus;1}(s)&space;=&space;\max_{a}&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;V_k(s')]>
+<img src= "https://latex.codecogs.com/gif.latex?V_{k&plus;1}(s)&space;=&space;\max_{a}&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;V_k(s')]" />
 
 となります．
 **どっかでみたことある！**ってなります

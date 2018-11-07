@@ -239,12 +239,12 @@ class Ploter_3D():
         plt.show()
 
 def main():
+    # iteration 50万回ver
     game = Blackjack()
-
     iterations = 500000
 
     for i in range(iterations):
-        print('i = {0}'.format(i))
+        print('i / max_iterations = {0} / {1}'.format(i, iterations))
         value_state_Ace, count_value_state_Ace, value_state_No_Ace, count_value_state_No_Ace = game.play()
 
     ave_value_state_Ace = value_state_Ace / count_value_state_Ace
@@ -257,14 +257,37 @@ def main():
 
     # 3Dplot
     # 軸の作成
-    
     x = np.array(range(1, 11)) # sumの状態
     y = np.array(range(12, 22)) # openされているカード
 
     # 格子に乗る値
     ploter_ace = Ploter_3D(x, y, np.array(ave_value_state_Ace))
     ploter_ace.plot_3d()
+    ploter_No_ace = Ploter_3D(x, y, np.array(ave_value_state_No_Ace))
+    ploter_No_ace.plot_3d()
 
+    # iteration 1万回ver
+    game = Blackjack()
+    iterations = 10000
+    for i in range(iterations):
+        print('i / max_iterations = {0} / {1}'.format(i, iterations))
+        value_state_Ace, count_value_state_Ace, value_state_No_Ace, count_value_state_No_Ace = game.play()
+
+    ave_value_state_Ace = value_state_Ace / count_value_state_Ace
+    ave_value_state_No_Ace = value_state_No_Ace / count_value_state_No_Ace
+
+    print(np.round(ave_value_state_Ace, 3))
+    print(np.round(ave_value_state_No_Ace, 3))
+
+    # 空配列が存在する場合⇒今回はないと想定
+    # 3Dplot
+    # 軸の作成
+    x = np.array(range(1, 11)) # sumの状態
+    y = np.array(range(12, 22)) # openされているカード
+
+    # 格子に乗る値
+    ploter_ace = Ploter_3D(x, y, np.array(ave_value_state_Ace))
+    ploter_ace.plot_3d()
     ploter_No_ace = Ploter_3D(x, y, np.array(ave_value_state_No_Ace))
     ploter_No_ace.plot_3d()
 

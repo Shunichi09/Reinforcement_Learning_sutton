@@ -35,7 +35,7 @@
 ## 方策
 これはある状態において，エージェント（ロボット）が行える行動の中から何を選ぶかの確率を表したものです
 
-<img src=https://latex.codecogs.com/gif.latex?\pi_t(s,a)>
+<img src= "https://latex.codecogs.com/gif.latex?\pi_t(s,a)" />
 
 この式はある時刻tにおいてロボットの状態がsの時，aを選ぶ確率となります．
 
@@ -49,7 +49,7 @@
 ## 報酬
 ある行動をとった結果もらえるご褒美的なものです．
 
-<img src=https://latex.codecogs.com/gif.latex?r_t>
+<img src= "https://latex.codecogs.com/gif.latex?r_t" />
 
 で表されることが多く，これで，時刻$t$にもらった報酬になります
 
@@ -64,7 +64,7 @@
 ある時刻からみた，1つのゲームなど時刻の終わりまでプレーした際の報酬の合計になります．
 単純に上の図の例なら，ゴールしたら1つのゲームが終わるので，ゴールするまでの報酬をすべて足し算すればよいわけですね
 
-<img src=https://latex.codecogs.com/gif.latex?R_t=r_{t&plus;1}&plus;r_{t&plus;2}&plus;r_{t&plus;3}&plus;r_{t&plus;4}&plus;...r_{t_infty}>
+<img src= "https://latex.codecogs.com/gif.latex?R_t=r_{t&plus;1}&plus;r_{t&plus;2}&plus;r_{t&plus;3}&plus;r_{t&plus;4}&plus;...r_{t_infty}" />
 
 これで，ある時刻tからみた収益になります（そのあとの時刻でもらえる報酬をすべて足せばよいわけです）
 これを最大化できる方策をゲットすればなんとなく良いような気がします
@@ -73,7 +73,7 @@
 上の収益の式だと，迷路ゲームのように終わりがなく，永久に続くものでは（振り子の制御など），収益が発散し，方策をうまく選択できなくなります．
 なので，過去の報酬を割引することで，報酬や収益を収束させようという魂胆です
 
-<img src=https://latex.codecogs.com/gif.latex?R_t&space;=&space;r_{t&plus;1}&plus;&space;\gamma&space;r_{t&plus;2}&plus;&space;\gamma^2&space;r_{t&plus;3}&plus;&space;\gamma^3&space;r_{t&plus;4}&plus;...r_{t_infty}=\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}>
+<img src= "https://latex.codecogs.com/gif.latex?R_t&space;=&space;r_{t&plus;1}&plus;&space;\gamma&space;r_{t&plus;2}&plus;&space;\gamma^2&space;r_{t&plus;3}&plus;&space;\gamma^3&space;r_{t&plus;4}&plus;...r_{t_infty}=\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}" />
 
 もちろん割引率のγです．収束しなくなるので
 ちなみにγ=0とすれば，即時報酬（行動に対してもらえる報酬のみ意識する）ことになります
@@ -100,20 +100,20 @@ t+1における環境の応答はtにおける状態と行動にのみ依存す�
 
 実際の式を見てみましょう
 
-<img src=https://latex.codecogs.com/gif.latex?V^\pi(s)&space;=&space;E_\pi&space;\bigl[R_t&space;|&space;s_t&space;=&space;s]&space;=&space;E_\pi&space;\bigl[\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}|s_t&space;=&space;s]>
+<img src= "https://latex.codecogs.com/gif.latex?V^\pi(s)&space;=&space;E_\pi&space;\bigl[R_t&space;|&space;s_t&space;=&space;s]&space;=&space;E_\pi&space;\bigl[\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}|s_t&space;=&space;s]" />
 
 
 ![image.png](https://qiita-image-store.s3.amazonaws.com/0/261584/fa6c1c98-40eb-2938-55a5-ac45d722b53b.png)
 
 **つまり，状態sにいて，方策πをとったときのどれだけ収益をもらえるか考えているわけです．**
-<img src=https://latex.codecogs.com/gif.latex?E_\pi>は期待値を表します
+<img src= "https://latex.codecogs.com/gif.latex?E_\pi" />は期待値を表します
 
 ## 行動価値関数
 さきほどはある状態sにいて，方策πに従うとしたときのでした
 なので次は
 さきほどはある状態sにいて，行動aをとり，そのあとは，方策πに従った場合の行動価値関数を定式化します
 
-<img src=https://latex.codecogs.com/gif.latex?Q^\pi(s)&space;=&space;E_\pi&space;\bigl[R_t&space;|&space;s_t&space;=&space;s,&space;a_t&space;=&space;a]&space;=&space;E_\pi&space;\bigl[\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}|s_t&space;=&space;s,&space;a_t&space;=&space;a]>
+<img src= "https://latex.codecogs.com/gif.latex?Q^\pi(s)&space;=&space;E_\pi&space;\bigl[R_t&space;|&space;s_t&space;=&space;s,&space;a_t&space;=&space;a]&space;=&space;E_\pi&space;\bigl[\sum_{k=0}^{\infty}&space;\gamma&space;r_{t&plus;k&plus;1}|s_t&space;=&space;s,&space;a_t&space;=&space;a]" />
 
 a_t = aという行動の条件が加わっているだけですね
 つまり，状態価値関数の中で，ある時刻tの行動が指定されているイメージになります
@@ -142,7 +142,7 @@ a_t = aという行動の条件が加わっているだけですね
 
 よって式はこんな風に変換できます
 
-<img src=https://latex.codecogs.com/gif.latex?V^\pi(s)&space;=&space;\sum_{a}&space;\pi(s,&space;a)&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;V^\pi(s')]>
+<img src= "https://latex.codecogs.com/gif.latex?V^\pi(s)&space;=&space;\sum_{a}&space;\pi(s,&space;a)&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;V^\pi(s')]" />
 
 ![image.png](https://qiita-image-store.s3.amazonaws.com/0/261584/7079f892-da2e-2de9-53ac-80d8e54ff347.png)
 
@@ -150,14 +150,14 @@ a_t = aという行動の条件が加わっているだけですね
 さきほどの式が理解できれば今回はおっけーなのかとおもいきや，最適行動価値関数というものも登場するので考えてみましょう．
 最適状態価値関数は
 
-<img src=https://latex.codecogs.com/gif.latex?V^*(s)&space;=&space;\max_{\pi}&space;V^\pi(s)>
+<img src= "https://latex.codecogs.com/gif.latex?V^*(s)&space;=&space;\max_{\pi}&space;V^\pi(s)" />
 
 ある状態で，状態価値関数を最大化する最適方策πを表しています
 
 次に
 最適行動価値関数は
 
-<img src=https://latex.codecogs.com/gif.latex?Q^*(s,&space;a)&space;=&space;\max_{\pi}&space;Q^\pi(s,&space;a)>
+<img src= "https://latex.codecogs.com/gif.latex?Q^*(s,&space;a)&space;=&space;\max_{\pi}&space;Q^\pi(s,&space;a)" />
 
 これは，ある状態で行動aをとりそののちは行動価値関数を最大化する最適方策に従うことを表しています
 
@@ -166,14 +166,14 @@ a_t = aという行動の条件が加わっているだけですね
 
 これもさっきと同じように変換してみると
 
-<img src=https://latex.codecogs.com/gif.latex?V^*(s)&space;=&space;\max_{a}&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;V^*(s')]>
+<img src= "https://latex.codecogs.com/gif.latex?V^*(s)&space;=&space;\max_{a}&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;V^*(s')]" />
 
 よって，ある状態$s$での最適状態価値関数は，移り変わった状態の最適価値関数を用いて表現できることがわかります
 これは，最適＝最適＋最適だという，ベルマンさんの最適性の原理に従っているやつです．
 
 さて同じく最適行動価値関数も以下のように算出できます
 
-<img src=https://latex.codecogs.com/gif.latex?Q^*(s,&space;a)&space;=&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;\max_a'&space;Q^*(s',&space;a')]>
+<img src= "https://latex.codecogs.com/gif.latex?Q^*(s,&space;a)&space;=&space;\sum_{s'}&space;\rho_{ss'}^a[r_{ss'}^a&space;&plus;&space;\gamma&space;\max_a'&space;Q^*(s',&space;a')]" />
 
 さて，これが分かったからなにがいいんだよというわけなのですが
 

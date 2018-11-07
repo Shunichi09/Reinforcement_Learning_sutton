@@ -34,7 +34,7 @@
 なので，決定論的に選んでいたところを改善し，いくらかの確率でランダムに選びます
 これが，第二回で出てきた$\it{\epsilon-greedy}$法です．いくらかの確率でランダムで行動を選ぶ作戦です．これによってたまにランダムに選ぶので，すべての非greedyな行動に対してもある程度の確率を保証します．
 
-<img src=https://latex.codecogs.com/gif.latex?\pi(s,&space;a)&space;>&space;0>
+<img src= "https://latex.codecogs.com/gif.latex?\pi(s,&space;a)&space;>&space;0" />
 
 ここで，sとaは，全ての行動と状態の対になります．
 
@@ -90,12 +90,12 @@
 相対生起確率を以下のように定義します．
 これは，ある方策πで動いたときに，異なる方策π’においては，それがどのくらい起こるのかを考えたものです
 
-<img src=https://latex.codecogs.com/gif.latex?\frac{p_i(s_t)}{p'_i(s_t)}&space;=&space;\prod_{k=t}^{T_i(s)-1}&space;\frac{\pi(s_k,&space;a_k)}{\pi'(s_k,&space;a_k)}>
+<img src= "https://latex.codecogs.com/gif.latex?\frac{p_i(s_t)}{p'_i(s_t)}&space;=&space;\prod_{k=t}^{T_i(s)-1}&space;\frac{\pi(s_k,&space;a_k)}{\pi'(s_k,&space;a_k)}" />
 
 とするわけです．
 そして，これを用いて，重みづけ平均をとります
 
-<img src=https://latex.codecogs.com/gif.latex?V(s)&space;=&space;\frac&space;{\sum_{k=t}^{n_s}\frac{p_i(s_t)}{p'_i(s_t)}R_i(s)}{&space;\sum_{k=t}^{n_s}\frac{p_i(s_t)}{p'_i(s_t)}}>
+<img src= "https://latex.codecogs.com/gif.latex?V(s)&space;=&space;\frac&space;{\sum_{k=t}^{n_s}\frac{p_i(s_t)}{p'_i(s_t)}R_i(s)}{&space;\sum_{k=t}^{n_s}\frac{p_i(s_t)}{p'_i(s_t)}}" />
 
 これによって異なる方策も評価することができてしまいます．
 
