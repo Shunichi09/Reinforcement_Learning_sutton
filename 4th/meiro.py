@@ -87,14 +87,16 @@ class Policy():# 方策定義
         self.actions_move['left'] = [0, -1]
 
 def main():
-    iterations = 3
+    iterations = 2000
     policy = Policy()
     map_size = [4, 4]
     dynamic_program = Dynamic_program(map_size, )
 
     for i in range(iterations):
         V_s = dynamic_program.update(policy)
-        print(V_s)
+        if i == 0 or i == 1 or i == 1999:
+            print("value function is (iteration_num = {0})  = ".format(i))
+            print(V_s)
 
 
 if __name__ == '__main__':

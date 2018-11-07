@@ -31,5 +31,7 @@ Q学習とSarsa！
 # License
 MIT
 
-# Basic requirement
+# Requirement
 - python3.5 or more
+- numpy 1.15.2 or more
+- matplotlib 3.0.0 or more
