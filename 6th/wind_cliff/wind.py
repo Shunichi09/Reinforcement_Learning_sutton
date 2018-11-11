@@ -186,7 +186,9 @@ class Agent():
             # update
             self.state = next_state
 
-        return history_opt_policy, history_opt_state
+        history_opt_state.append(next_state)
+
+        return history_opt_policy, np.array(history_opt_state)
     
     def _play(self, state, action):
         """
@@ -262,11 +264,12 @@ def main():
     agent = Agent()
     history_episode = agent.train_TD(170)
 
-    plt.plot(range(len(history_episode)), history_episode)
-    plt.xlabel("time step")
-    plt.ylabel("episode")
+    fig1 = plt.figure()
+    axis1 = fig1.add_subplot(111)
 
-    plt.show()
+    axis1.plot(range(len(history_episode)), history_episode)
+    axis1.set_xlabel("time step")
+    axis1.set_ylabel("episode")
 
     # calc opt path
     history_opt_policy, history_opt_state = agent.calc_opt_policy()
@@ -274,6 +277,13 @@ def main():
     print("opt policy is = {0}".format(history_opt_policy))
 
     print("opt state is = {0}".format(history_opt_state))
+
+    fig2 = plt.figure()
+    axis2 = fig2.add_subplot(111)
+
+    axis2.plot(history_opt_state[:, 1]+0.5, history_opt_state[:, 0]+0.5, marker=".")
+    axis2.set_aspect('equal')
+    plt.show()
 
 if __name__ == "__main__":
     main()

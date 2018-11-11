@@ -289,7 +289,7 @@ Aceなし
 # ブラックジャックの問題（Usage）
 
 ```
-$ python3.6 blackjack2.py
+$ python blackjack2.py
 ```
 
 # ブラックジャックの問題（結果）

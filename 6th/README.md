@@ -5,8 +5,6 @@ TD学習の説明をしているフォルダになります
 # Random Walk
 TD学習とモンテカルロ法の比較
 
-# Wind
-Sarsaで解いた風のあるmapを歩く問題になります
-
-# Cliff
-SarsaとQでといた風のある崖を歩く問題になります
+# Wind_Cliff
+Sarsaで解いた風のある地を歩く問題になります
+SarsaとQでといた崖を歩く問題になります

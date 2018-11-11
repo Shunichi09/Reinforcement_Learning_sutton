@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-class WindField():
+class CliffField():
     """
-    environment wind map
+    environment Cliff field
 
     Attributes
     ------------
@@ -12,18 +12,19 @@ class WindField():
         row size of the map
     map_colum_size : int
         coulum size of the map
-    wind_map : numpy.ndarray
-        wind map
+    cliff_map : numpy.ndarray
+        cliff map
     """
     def __init__(self):
-        self.map_colum_size = 10
-        self.map_row_size = 7
-        self.wind_map = np.zeros((self.map_row_size, self.map_colum_size))
-        # set the winds
-        for i, wind in enumerate([0, 0, 0, 1, 1, 1, 2, 2, 1, 0]):
-            self.wind_map[:, i] = wind
+        self.map_colum_size = 12
+        self.map_row_size = 4
+        self.cliff_map = np.zeros((self.map_row_size, self.map_colum_size), dtype=bool)
 
-        print(self.wind_map)
+        for i in range(1, self.map_colum_size-1):
+            self.cliff_map[0, i] = True
+
+        print(self.cliff_map)
+        # a = input()
 
     def state_update(self, state, action):
         """
@@ -45,41 +46,46 @@ class WindField():
         """
         next_state = np.zeros_like(state)
         end_flg = False
+        cliff_flg = False
 
         if action == "left":
             # row
-            next_state[0] = min(self.wind_map[state[0], state[1]] + state[0], self.map_row_size-1)
+            next_state[0] = state[0]
             # colum
             next_state[1] = max(state[1] - 1, 0)
 
         elif action == "right":
             # row
-            next_state[0] = min(self.wind_map[state[0], state[1]] + state[0], self.map_row_size-1)
+            next_state[0] = state[0]
             # colum
             next_state[1] = min(state[1] + 1, self.map_colum_size-1)
 
         elif action == "up":
             # row
-            next_state[0] = min(self.wind_map[state[0], state[1]] + state[0] + 1, self.map_row_size-1)
+            next_state[0] = min(state[0] + 1, self.map_row_size-1)
             # colum
             next_state[1] = state[1]
 
         elif action == "down":
             # row
-            temp = min(self.wind_map[state[0], state[1]] + state[0] - 1, self.map_row_size-1)
-            next_state[0] = max(temp, 0)
+            next_state[0] = max(state[0] - 1, 0)
             # colum
-            next_state[1] = state[1] 
+            next_state[1] = state[1]
         
         # judge the goal
-        if next_state[0] == 3 and next_state[1] == 7:
+        if next_state[0] == 0 and next_state[1] == 11:
             print("goal!")
             temp_reward = 0.
             end_flg = True
         else:
             temp_reward = -1.
 
-        
+        # judge cliff
+        cliff_flg = self.cliff_map[next_state[0], next_state[1]]
+        if cliff_flg:
+            temp_reward = -100.
+            next_state = [0, 0] # back to start
+
         return end_flg, next_state, temp_reward
 
 class Agent():
@@ -104,7 +110,7 @@ class Agent():
 
     def __init__(self):
         # environment
-        self.model = WindField()
+        self.model = CliffField()
         
         self.state = None
         self.action_list = np.array(["left", "right", "up", "down"])
@@ -116,7 +122,7 @@ class Agent():
         self.history_state = None
         self.action_values = np.zeros((self.model.map_row_size, self.model.map_colum_size, len(self.action_list))) # map size and each state have 4 action
 
-    def train_TD(self, max_train_num):
+    def train_sarsa(self, max_train_num):
         """
         training the agent by TD Sarsa
         
@@ -126,12 +132,13 @@ class Agent():
             training iteration num
         """
         train_num = 0
-        history_episode = []
+        history_reward = []
 
         while (train_num<max_train_num):
             # initial state
-            self.state = [3, 0]
+            self.state = [0, 0]
             end_flg = False
+            rewards = 0.
             # play
             action = self._decide_action(self.state)
 
@@ -142,9 +149,10 @@ class Agent():
                 self._action_valuefunc_update(temp_reward, self.state, action, next_state, next_action)
 
                 # update the history
-                history_episode.append(train_num)
+                rewards += temp_reward
 
                 if end_flg:
+                    history_reward.append(rewards)
                     break
 
                 # update
@@ -153,7 +161,48 @@ class Agent():
             
             train_num += 1
 
-        return history_episode
+        return history_reward
+
+    def train_Q(self, max_train_num):
+        """
+        training the agent by Q 
+        
+        Parameters
+        -----------
+        max_train_num : int
+            training iteration num
+        """
+        train_num = 0
+        history_reward = []
+
+        while (train_num<max_train_num):
+            # initial state
+            self.state = [0, 0]
+            end_flg = False
+            rewards = 0.
+            
+            while True: # if break the episode have finished
+                # play
+                action = self._decide_action(self.state) # ε-greedy
+                end_flg, next_state, temp_reward = self._play(self.state, action)
+
+                # Q learning
+                next_action = self._decide_action(next_state, greedy_rate=0) # max policy, virtual action
+                self._action_valuefunc_update(temp_reward, self.state, action, next_state, next_action) # calc action value
+
+                # update the history
+                rewards += temp_reward
+
+                if end_flg:
+                    history_reward.append(rewards)
+                    break
+                
+                # update actual
+                self.state = next_state # actual next state
+                
+            train_num += 1
+
+        return history_reward
     
     def calc_opt_policy(self):
         """
@@ -165,7 +214,7 @@ class Agent():
 
         """
         # initial state
-        self.state = [3, 0]
+        self.state = [0, 0]
         end_flg = False
         history_opt_policy = []
         history_opt_state = []
@@ -185,8 +234,10 @@ class Agent():
 
             # update
             self.state = next_state
+        
+        history_opt_state.append(next_state)
 
-        return history_opt_policy, history_opt_state
+        return history_opt_policy, np.array(history_opt_state)
     
     def _play(self, state, action):
         """
@@ -259,21 +310,41 @@ class Agent():
 
 def main():
     # training
-    agent = Agent()
-    history_episode = agent.train_TD(170)
+    agent_sarsa = Agent()
+    sarsa_history_reward = agent_sarsa.train_sarsa(500)
 
-    plt.plot(range(len(history_episode)), history_episode)
-    plt.xlabel("time step")
-    plt.ylabel("episode")
+    agent_Q = Agent()
+    Q_history_reward = agent_Q.train_Q(500)
 
-    plt.show()
+    fig1 = plt.figure()
+    axis1 = fig1.add_subplot(111)
+
+    axis1.plot(range(len(sarsa_history_reward)), sarsa_history_reward, label="Sarsa")
+    axis1.plot(range(len(Q_history_reward)), Q_history_reward, label="Q")
+
+    axis1.set_xlabel("episode")
+    axis1.set_ylabel("reward")
+    axis1.legend()
 
     # calc opt path
-    history_opt_policy, history_opt_state = agent.calc_opt_policy()
+    fig2 = plt.figure()
+    axis2 = fig2.add_subplot(111)
+    axis2.set_aspect('equal')
 
-    print("opt policy is = {0}".format(history_opt_policy))
+    sarsa_history_opt_policy, sarsa_history_opt_state = agent_sarsa.calc_opt_policy()
+    Q_history_opt_policy, Q_history_opt_state = agent_Q.calc_opt_policy()
 
-    print("opt state is = {0}".format(history_opt_state))
+    print("Sarsa opt policy is = {0}".format(sarsa_history_opt_policy))
+    print("Sarsa opt state is = {0}".format(sarsa_history_opt_state))
+
+    print("Q opt policy is = {0}".format(Q_history_opt_policy))
+    print("Q opt state is = {0}".format(Q_history_opt_state))
+
+    axis2.plot(sarsa_history_opt_state[:, 1]+0.5, sarsa_history_opt_state[:, 0]+0.5, marker=".", label="Sarsa")
+    axis2.plot(Q_history_opt_state[:, 1]+0.5, Q_history_opt_state[:, 0]+0.5, marker=".", label="Q")
+    axis2.legend()
+
+    plt.show()
 
 if __name__ == "__main__":
     main()
